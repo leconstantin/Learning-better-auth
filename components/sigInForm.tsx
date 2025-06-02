@@ -1,4 +1,5 @@
 "use client";
+
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -10,13 +11,16 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { zodResolver } from "@hookform/resolvers/zod";
+import Link from "next/link";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import * as z from "zod";
+import { PasswordInput } from "./ui/password-input";
 
 const formSchema = z.object({
-  email: z.string(),
-  password: z.string().min(1),
+  email: z.string().min(1, "Email is required").email("Invalid email address"),
+  password: z.string().min(1, "Password is required"),
 });
 
 export default function SignInForm() {
@@ -28,17 +32,20 @@ export default function SignInForm() {
     },
   });
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
+  const [isLoading, setIsLoading] = useState(false);
+
+  async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
+      setIsLoading(true);
+      // Simulate async login (replace with real API call)
+      await new Promise((resolve) => setTimeout(resolve, 2000));
       console.log(values);
-      toast(
-        <pre className="mt-2 w-[340px] rounded-md bg-slate-950 p-4">
-          <code className="text-white">{JSON.stringify(values, null, 2)}</code>
-        </pre>
-      );
+      toast.success("Successfully logged in!");
     } catch (error) {
-      console.error("Form submission error", error);
-      toast.error("Failed to submit the form. Please try again.");
+      console.error("Login error", error);
+      toast.error("Failed to log in. Please try again.");
+    } finally {
+      setIsLoading(false);
     }
   }
 
@@ -47,9 +54,10 @@ export default function SignInForm() {
       <div className="flex flex-col items-center gap-2 text-center">
         <h1 className="text-2xl font-bold">Login to your account</h1>
         <p className="text-muted-foreground text-sm text-balance">
-          Enter your email below to login to your account
+          Enter your email below to log in to your account.
         </p>
       </div>
+
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="grid gap-6">
           <FormField
@@ -61,7 +69,6 @@ export default function SignInForm() {
                 <FormControl>
                   <Input placeholder="m@example.com" type="email" {...field} />
                 </FormControl>
-
                 <FormMessage />
               </FormItem>
             )}
@@ -74,22 +81,64 @@ export default function SignInForm() {
               <FormItem className="grid gap-3">
                 <FormLabel>Password</FormLabel>
                 <FormControl>
-                  <Input placeholder="" type="" {...field} />
+                  <PasswordInput placeholder="Password" {...field} />
                 </FormControl>
-
+                <div className="text-right">
+                  <Link
+                    href="/forgot-password"
+                    className="text-sm underline underline-offset-4 text-muted-foreground"
+                  >
+                    Forgot password?
+                  </Link>
+                </div>
                 <FormMessage />
               </FormItem>
             )}
           />
-          <Button type="submit">LogIn</Button>
+
+          <Button type="submit" className="w-full" disabled={isLoading}>
+            {isLoading ? (
+              <span className="flex items-center gap-2">
+                <svg
+                  className="animate-spin h-5 w-5 text-white"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
+                  <circle
+                    className="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                  ></circle>
+                  <path
+                    className="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+                  ></path>
+                </svg>
+                Logging in...
+              </span>
+            ) : (
+              "Log In"
+            )}
+          </Button>
         </form>
       </Form>
+
       <div className="after:border-border relative text-center text-sm after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t">
         <span className="bg-background text-muted-foreground relative z-10 px-2">
           Or continue with
         </span>
       </div>
-      <Button variant="outline" className="w-full">
+
+      <Button
+        variant="outline"
+        className="w-full"
+        aria-label="Login with GitHub"
+      >
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
           <path
             d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"
@@ -98,11 +147,12 @@ export default function SignInForm() {
         </svg>
         Login with GitHub
       </Button>
+
       <div className="text-center text-sm mt-6">
         Don&apos;t have an account?{" "}
-        <a href="#" className="underline underline-offset-4">
+        <Link href="/signUp" className="underline underline-offset-4">
           Sign up
-        </a>
+        </Link>
       </div>
     </section>
   );
