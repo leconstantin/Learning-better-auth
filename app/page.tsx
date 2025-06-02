@@ -11,6 +11,9 @@ export default function Home() {
         <Button>
           <Link href={"/signUp"}>SignUp</Link>
         </Button>
+        <Button>
+          <Link href={"/dashboard"}>Dashboard</Link>
+        </Button>
       </div>
     </div>
   );

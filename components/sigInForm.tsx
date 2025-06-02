@@ -10,22 +10,20 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { TupFormSchema, upFormSchema } from "@/lib/validation/signInSchema";
+import { signInUser } from "@/server/users";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
-import * as z from "zod";
 import { PasswordInput } from "./ui/password-input";
 
-const formSchema = z.object({
-  email: z.string().min(1, "Email is required").email("Invalid email address"),
-  password: z.string().min(1, "Password is required"),
-});
-
 export default function SignInForm() {
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
+  const router = useRouter();
+  const form = useForm<TupFormSchema>({
+    resolver: zodResolver(upFormSchema),
     defaultValues: {
       email: "",
       password: "",
@@ -34,20 +32,22 @@ export default function SignInForm() {
 
   const [isLoading, setIsLoading] = useState(false);
 
-  async function onSubmit(values: z.infer<typeof formSchema>) {
+  const onSubmit = async (values: TupFormSchema) => {
+    setIsLoading(true);
     try {
-      setIsLoading(true);
-      // Simulate async login (replace with real API call)
-      await new Promise((resolve) => setTimeout(resolve, 2000));
-      console.log(values);
-      toast.success("Successfully logged in!");
+      const signInResult = await signInUser(values);
+
+      if (signInResult?.redirect) {
+        router.push(signInResult.redirect);
+        toast.success("Successfully logged in!");
+      }
     } catch (error) {
       console.error("Login error", error);
       toast.error("Failed to log in. Please try again.");
     } finally {
       setIsLoading(false);
     }
-  }
+  };
 
   return (
     <section className="flex flex-col gap-6">

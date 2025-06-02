@@ -3,10 +3,9 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Info } from "lucide-react";
 import Link from "next/link";
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
-import * as z from "zod";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -25,32 +24,16 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { inFormSchema, TInFormSchema } from "@/lib/validation/signUpSchema";
+import { signUpUser } from "@/server/users";
+import { useRouter } from "next/navigation";
 import { PasswordInput } from "./ui/password-input";
 
-const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^\da-zA-Z]).{6,}$/;
-
-const formSchema = z
-  .object({
-    first_name: z.string().min(2, "First name must be at least 2 characters"),
-    last_name: z.string().min(2, "Last name must be at least 2 characters"),
-    email: z.string().email("Invalid email address"),
-    password: z
-      .string()
-      .min(6, "Password must be at least 6 characters")
-      .regex(
-        passwordRegex,
-        "Password must include uppercase, lowercase, number, and special character"
-      ),
-    confirm_password: z.string(),
-  })
-  .refine((data) => data.password === data.confirm_password, {
-    message: "Passwords do not match",
-    path: ["confirm_password"],
-  });
-
 export default function SignUpForm() {
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
+  const router = useRouter();
+
+  const form = useForm<TInFormSchema>({
+    resolver: zodResolver(inFormSchema),
     defaultValues: {
       first_name: "",
       last_name: "",
@@ -63,7 +46,7 @@ export default function SignUpForm() {
   const [passwordStrength, setPasswordStrength] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
 
-  const computeStrength = (password: string) => {
+  const computeStrength = useCallback((password: string) => {
     let strength = 0;
     if (password.length >= 6) strength += 20;
     if (password.length >= 12) strength += 10;
@@ -72,7 +55,7 @@ export default function SignUpForm() {
     if (/\d/.test(password)) strength += 15;
     if (/[!@#$%^&*]/.test(password)) strength += 15;
     return Math.min(strength, 100);
-  };
+  }, []);
 
   const getStrengthColor = (strength: number) => {
     if (strength >= 85) return "bg-green-500";
@@ -81,12 +64,15 @@ export default function SignUpForm() {
     return "bg-gray-300";
   };
 
-  const onSubmit = async (values: z.infer<typeof formSchema>) => {
+  const onSubmit = async (values: TInFormSchema) => {
     setIsLoading(true);
     try {
-      console.log(values);
-      await new Promise((resolve) => setTimeout(resolve, 2000)); // Simulate API call
-      toast.success("Account created successfully!");
+      const signUpResult = await signUpUser(values);
+
+      if (signUpResult?.redirect) {
+        router.push(signUpResult.redirect);
+        toast.success("Account created successfully!");
+      }
     } catch (error) {
       toast.error("An error occurred during sign up.");
     } finally {
