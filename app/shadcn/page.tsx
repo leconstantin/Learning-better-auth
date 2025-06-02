@@ -1,4 +1,4 @@
-import { LoginForm } from "@/components/login-form";
+import SignInForm from "@/components/sigInForm";
 import { GalleryVerticalEnd } from "lucide-react";
 
 export default function LoginPage() {
@@ -10,18 +10,18 @@ export default function LoginPage() {
             <div className="bg-primary text-primary-foreground flex size-6 items-center justify-center rounded-md">
               <GalleryVerticalEnd className="size-4" />
             </div>
-            Acme Inc.
+            InfoSt Inc.
           </a>
         </div>
         <div className="flex flex-1 items-center justify-center">
           <div className="w-full max-w-xs">
-            <LoginForm />
+            <SignInForm />
           </div>
         </div>
       </div>
       <div className="bg-muted relative hidden lg:block">
         <img
-          src="/a.jpg"
+          src="/c.jpg"
           alt="Image"
           className="absolute inset-0 h-full w-full object-cover dark:brightness-[0.2] dark:grayscale"
         />
