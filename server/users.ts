@@ -4,6 +4,34 @@ import { auth } from "@/lib/auth";
 import { upFormSchema } from "@/lib/validation/signInSchema";
 import { inFormSchema } from "@/lib/validation/signUpSchema";
 import z from "zod";
+import { headers } from "next/headers";
+import { redirect } from "next/navigation";
+import { prisma } from "@/lib/prisma";
+
+export const getUserSession = async () => {
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
+
+  if (!session?.user?.id) {
+    redirect("/sign-in");
+  }
+
+  const currentUser = await prisma.user.findFirst({
+    where: {
+      id: session.user.id,
+    },
+  });
+
+  if (!currentUser) {
+    redirect("/login");
+  }
+
+  return {
+    ...session,
+    user: currentUser,
+  };
+};
 
 export const signUpUser = async (data: z.infer<typeof inFormSchema>) => {
   try {

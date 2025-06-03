@@ -52,7 +52,7 @@ export default function SignInForm() {
   };
 
   return (
-    <section className="flex flex-col gap-6">
+    <section className="flex flex-col gap-8">
       <div className="flex flex-col items-center gap-2 text-center">
         <h1 className="text-2xl font-bold">Sign In to your account</h1>
         <p className="text-muted-foreground text-sm text-balance">
@@ -69,7 +69,12 @@ export default function SignInForm() {
               <FormItem className="grid gap-3">
                 <FormLabel>Email</FormLabel>
                 <FormControl>
-                  <Input placeholder="m@example.com" type="email" {...field} />
+                  <Input
+                    placeholder="m@example.com"
+                    className="rounded-none"
+                    type="email"
+                    {...field}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -81,24 +86,35 @@ export default function SignInForm() {
             name="password"
             render={({ field }) => (
               <FormItem className="grid gap-3">
-                <FormLabel>Password</FormLabel>
+                <FormLabel className="flex justify-between items-center">
+                  Password
+                  <div className="text-right">
+                    <Link
+                      href="/forgot-password"
+                      className="text-sm underline underline-offset-4 text-muted-foreground"
+                    >
+                      Forgot password?
+                    </Link>
+                  </div>
+                </FormLabel>
                 <FormControl>
-                  <PasswordInput placeholder="Password" {...field} />
+                  <PasswordInput
+                    placeholder="Password"
+                    className="rounded-none"
+                    {...field}
+                  />
                 </FormControl>
-                <div className="text-right">
-                  <Link
-                    href="/forgot-password"
-                    className="text-sm underline underline-offset-4 text-muted-foreground"
-                  >
-                    Forgot password?
-                  </Link>
-                </div>
+
                 <FormMessage />
               </FormItem>
             )}
           />
 
-          <Button type="submit" className="w-full" disabled={isLoading}>
+          <Button
+            type="submit"
+            className="w-full rounded-none"
+            disabled={isLoading}
+          >
             {isLoading ? (
               <span className="flex items-center gap-2">
                 <svg
@@ -138,7 +154,7 @@ export default function SignInForm() {
 
       <Button
         variant="outline"
-        className="w-full"
+        className="w-full rounded-none"
         aria-label="Login with GitHub"
       >
         <svg
