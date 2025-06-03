@@ -1,40 +1,44 @@
 "use client";
-import { Button } from "@/components/ui/button";
 import { authClient } from "@/lib/auth-client";
-import { Loader2, LogOut } from "lucide-react";
+import { LogOutIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { Spinner } from "../spinner";
 
 export default function SignOutBtn() {
   const [isSignOut, setIsSignOut] = useState(false);
   const router = useRouter();
+
+  const handleSignOut = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation(); // Prevent dropdown from closing
+
+    setIsSignOut(true);
+    await authClient.signOut({
+      fetchOptions: {
+        onSuccess: () => {
+          router.push("/");
+        },
+      },
+    });
+    setIsSignOut(false);
+  };
+
   return (
-    <Button
-      className="gap-2 z-10"
-      variant="secondary"
-      onClick={async () => {
-        setIsSignOut(true);
-        await authClient.signOut({
-          fetchOptions: {
-            onSuccess: () => {
-              router.push("/"); // redirect to login page
-            },
-          },
-        });
-        setIsSignOut(false);
-      }}
+    <button
+      onClick={handleSignOut}
       disabled={isSignOut}
+      className={`w-full text-left flex items-center gap-2 px-2 py-1.5 rounded-md transition 
+        ${isSignOut ? "opacity-50 cursor-not-allowed" : "hover:bg-muted"}`}
     >
-      <span className="text-sm">
-        {isSignOut ? (
-          <Loader2 size={15} className="animate-spin" />
-        ) : (
-          <div className="flex items-center gap-2">
-            <LogOut size={16} />
-            Sign Out
-          </div>
-        )}
-      </span>
-    </Button>
+      {isSignOut ? (
+        <Spinner text="Signing out..." />
+      ) : (
+        <>
+          <LogOutIcon className="w-4 h-4" />
+          <span className="text-sm">Log out</span>
+        </>
+      )}
+    </button>
   );
 }

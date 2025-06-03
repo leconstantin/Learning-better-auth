@@ -1,5 +1,6 @@
-import SignOutBtn from "@/components/dashboard/sign-out-btn";
-import Usercard from "@/components/dashboard/usercard";
+import ChangePassword from "@/components/dashboard/changePassword";
+import { EditUserDialog } from "@/components/dashboard/editUser";
+import { Usercard } from "@/components/dashboard/usercard";
 import { getUserSession } from "@/server/users";
 
 export default async function Page() {
@@ -14,7 +15,10 @@ export default async function Page() {
         {user.user.name}
         <Usercard />
         <div>
-          <SignOutBtn />
+          <ChangePassword />
+        </div>
+        <div>
+          <EditUserDialog />
         </div>
       </div>
     </div>

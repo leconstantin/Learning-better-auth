@@ -12,7 +12,9 @@ export const getUserSession = async () => {
   const session = await auth.api.getSession({
     headers: await headers(),
   });
-
+  const listSession = await auth.api.listSessions({
+    headers: await headers(),
+  });
   if (!session?.user?.id) {
     redirect("/sign-in");
   }
@@ -29,6 +31,7 @@ export const getUserSession = async () => {
 
   return {
     ...session,
+    ...listSession,
     user: currentUser,
   };
 };
