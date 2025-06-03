@@ -46,29 +46,36 @@ export const signInUser = async (data: z.infer<typeof upFormSchema>) => {
     if (!safeData.success) {
       return {
         success: false,
-        error: safeData.error.errors.map((err) => err.message).join(", "),
+        errors: safeData.error.errors.map((err) => err.message),
+        values: {},
       };
     }
 
     const { email, password } = safeData.data;
 
-    await auth.api.signInEmail({
+    const signInResponse = await auth.api.signInEmail({
       body: { email, password },
     });
 
+    if (!signInResponse?.token || !signInResponse?.user) {
+      return {
+        success: false,
+        errors: ["Invalid email or password."],
+        values: {},
+      };
+    }
+
     return {
       success: true,
-      errors: {},
+      errors: [],
       values: { text: "Successfully signed in." },
       redirect: "/dashboard",
     };
   } catch (error) {
-    console.error(error); // Optional: Log for debugging
+    console.error(error);
     return {
       success: false,
-      errors: {
-        message: [(error as Error).message || "An unknown error occurred"],
-      },
+      errors: [(error as Error).message || "An unknown error occurred"],
       values: {},
     };
   }
