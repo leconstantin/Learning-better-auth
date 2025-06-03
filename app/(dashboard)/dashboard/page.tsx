@@ -1,6 +1,7 @@
 import ChangePassword from "@/components/dashboard/changePassword";
 import { EditUserDialog } from "@/components/dashboard/editUser";
 import { Usercard } from "@/components/dashboard/usercard";
+import VerifyUser from "@/components/dashboard/verifyUser";
 import { getUserSession } from "@/server/users";
 
 export default async function Page() {
@@ -19,6 +20,9 @@ export default async function Page() {
         </div>
         <div>
           <EditUserDialog />
+        </div>
+        <div>
+          <VerifyUser />
         </div>
       </div>
     </div>

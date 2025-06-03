@@ -20,6 +20,17 @@ export const auth = betterAuth({
   //           })
   //       }
   //   },
+  emailVerification: {
+    async sendVerificationEmail({ user, url }) {
+      const res = await resend.emails.send({
+        from: "Acme <onboarding@resend.dev>",
+        to: user.email,
+        subject: "Verify your email address",
+        html: `<a href="${url}">Verify your email address</a>`,
+      });
+      console.log(res, user.email);
+    },
+  },
   emailAndPassword: {
     enabled: true,
     // requireEmailVerification: true,
@@ -33,5 +44,11 @@ export const auth = betterAuth({
       });
     },
   },
+  rateLimit: {
+    enabled: true,
+    window: 60 * 1000, // 1 minute
+    max: 10, // 10 requests per minute
+  },
+
   plugins: [nextCookies()],
 });
