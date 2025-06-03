@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useCallback, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -24,10 +25,10 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { PasswordInput } from "./ui/password-input";
 import { inFormSchema, TInFormSchema } from "@/lib/validation/signUpSchema";
 import { signUpUser } from "@/server/users";
-import { useRouter } from "next/navigation";
-import { PasswordInput } from "./ui/password-input";
+import { Spinner } from "./spinner";
 
 export default function SignUpForm() {
   const router = useRouter();
@@ -68,13 +69,13 @@ export default function SignUpForm() {
     setIsLoading(true);
     try {
       const signUpResult = await signUpUser(values);
-
       if (signUpResult?.redirect) {
         router.push(signUpResult.redirect);
         toast.success("Account created successfully!");
       }
-    } catch (error) {
-      toast.error("An error occurred during sign up.");
+    } catch (error: any) {
+      const message = error?.message || "An error occurred during sign up.";
+      toast.error(message);
     } finally {
       setIsLoading(false);
     }
@@ -82,7 +83,7 @@ export default function SignUpForm() {
 
   return (
     <section className="flex flex-col gap-6">
-      <div className="flex flex-col items-center gap-2 text-center">
+      <div className="flex flex-col gap-2">
         <h1 className="text-2xl font-bold">Sign Up to your account</h1>
         <p className="text-muted-foreground text-sm">
           Enter your information to create an account
@@ -103,6 +104,7 @@ export default function SignUpForm() {
                       <FormControl>
                         <Input
                           placeholder="Max"
+                          autoComplete="given-name"
                           className="rounded-none"
                           type="text"
                           {...field}
@@ -124,6 +126,7 @@ export default function SignUpForm() {
                       <FormControl>
                         <Input
                           placeholder="Robison"
+                          autoComplete="family-name"
                           className="rounded-none"
                           type="text"
                           {...field}
@@ -145,6 +148,7 @@ export default function SignUpForm() {
                   <FormControl>
                     <Input
                       placeholder="m@example.com"
+                      autoComplete="email"
                       type="email"
                       className="rounded-none"
                       {...field}
@@ -177,11 +181,13 @@ export default function SignUpForm() {
                   <FormControl>
                     <PasswordInput
                       placeholder="Password"
+                      autoComplete="new-password"
                       className="rounded-none"
                       {...field}
                       onChange={(e) => {
+                        const val = e.target.value;
                         field.onChange(e);
-                        setPasswordStrength(computeStrength(e.target.value));
+                        setPasswordStrength(val ? computeStrength(val) : 0);
                       }}
                     />
                   </FormControl>
@@ -189,6 +195,15 @@ export default function SignUpForm() {
                     value={passwordStrength}
                     className={`mt-2 h-1 ${getStrengthColor(passwordStrength)}`}
                   />
+                  <span className="text-xs mt-1 text-muted-foreground">
+                    {passwordStrength >= 85
+                      ? "Strong"
+                      : passwordStrength >= 60
+                      ? "Medium"
+                      : passwordStrength > 0
+                      ? "Weak"
+                      : ""}
+                  </span>
                   <FormMessage />
                 </FormItem>
               )}
@@ -215,6 +230,7 @@ export default function SignUpForm() {
                   <FormControl>
                     <PasswordInput
                       placeholder="Confirm password"
+                      autoComplete="new-password"
                       className="rounded-none"
                       {...field}
                     />
@@ -223,34 +239,14 @@ export default function SignUpForm() {
                 </FormItem>
               )}
             />
-            <Button type="submit" className="rounded-none" disabled={isLoading}>
-              {isLoading ? (
-                <>
-                  <svg
-                    className="animate-spin h-5 w-5 text-white"
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                  >
-                    <circle
-                      className="opacity-25"
-                      cx="12"
-                      cy="12"
-                      r="10"
-                      stroke="currentColor"
-                      strokeWidth="4"
-                    ></circle>
-                    <path
-                      className="opacity-75"
-                      fill="currentColor"
-                      d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
-                    ></path>
-                  </svg>
-                  Signing Up...
-                </>
-              ) : (
-                "Sign Up"
-              )}
+
+            <Button
+              type="submit"
+              className="rounded-none"
+              disabled={isLoading || passwordStrength < 60}
+              aria-busy={isLoading}
+            >
+              {isLoading ? <Spinner text="Signing up..." /> : "Sign Up"}
             </Button>
           </form>
         </Form>
@@ -265,7 +261,8 @@ export default function SignUpForm() {
       <Button
         variant="outline"
         className="w-full rounded-none"
-        aria-label="Sign in with GitHub"
+        aria-label="Sign in with Google"
+        disabled={isLoading}
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"
