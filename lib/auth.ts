@@ -2,14 +2,36 @@ import { betterAuth } from "better-auth";
 import { prismaAdapter } from "better-auth/adapters/prisma";
 import { prisma } from "./prisma";
 import { nextCookies } from "better-auth/next-js";
+import { Resend } from "resend";
+import ForgotPasswordEmail from "@/components/emails/forgot-password";
 // If your Prisma file is located elsewhere, you can change the path
-
+const resend = new Resend(process.env.RESEND_API_KEY);
 export const auth = betterAuth({
   database: prismaAdapter(prisma, {
     provider: "postgresql",
   }),
+  //  emailVerification: {
+  //       sendVerificationEmail: async ({ user, url, token }, request) => {
+  //           await resend.emails.send({
+  //                from: `${process.env.EMAIL_SENDER_NAME} <${process.env.EMAIL_SENDER_ADDRESS}>`,
+  //               to: user.email,
+  //               subject: 'Verify your email address',
+  //               text: `Click the link to verify your email: ${url}`
+  //           })
+  //       }
+  //   },
   emailAndPassword: {
     enabled: true,
+    // requireEmailVerification: true,
+    sendResetPassword: async ({ user, url, token }, request) => {
+      await resend.emails.send({
+        // from: `${process.env.EMAIL_SENDER_NAME} <${process.env.EMAIL_SENDER_ADDRESS}>`,
+        from: "Acme <onboarding@resend.dev>",
+        to: user.email,
+        subject: "Reset your password",
+        react: ForgotPasswordEmail({ resetLink: url, username: user.name }),
+      });
+    },
   },
   plugins: [nextCookies()],
 });

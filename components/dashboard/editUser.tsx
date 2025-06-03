@@ -29,6 +29,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { authClient as client, useSession } from "@/lib/auth-client";
+import { Spinner } from "../spinner";
 
 const formSchema = z.object({
   name: z.string().min(1, "Name is required"),
@@ -100,7 +101,7 @@ export function EditUserDialog() {
         </Button>
       </DialogTrigger>
 
-      <DialogContent className="sm:max-w-[425px] w-11/12">
+      <DialogContent className="sm:max-w-[425px] w-11/12 rounded-none">
         <DialogHeader>
           <DialogTitle>Edit User</DialogTitle>
           <DialogDescription>Edit user information</DialogDescription>
@@ -115,7 +116,11 @@ export function EditUserDialog() {
                 <FormItem>
                   <FormLabel>Full Name</FormLabel>
                   <FormControl>
-                    <Input placeholder="Enter full name" {...field} />
+                    <Input
+                      placeholder="Enter full name"
+                      className="rounded-none"
+                      {...field}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -141,7 +146,7 @@ export function EditUserDialog() {
                     type="file"
                     accept="image/*"
                     onChange={handleImageChange}
-                    className="w-full text-muted-foreground"
+                    className="w-full text-muted-foreground rounded-none"
                   />
                   {imagePreview && (
                     <X
@@ -157,12 +162,12 @@ export function EditUserDialog() {
             </div>
 
             <DialogFooter>
-              <Button type="submit" disabled={isLoading}>
-                {isLoading ? (
-                  <Loader2 size={15} className="animate-spin" />
-                ) : (
-                  "Update"
-                )}
+              <Button
+                type="submit"
+                disabled={isLoading}
+                className="rounded-none w-full"
+              >
+                {isLoading ? <Spinner text="Updating..." /> : "Update"}
               </Button>
             </DialogFooter>
           </form>

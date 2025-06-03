@@ -21,6 +21,8 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Spinner } from "./spinner";
+import { authClient } from "@/lib/auth-client";
+import { toast } from "sonner";
 
 export default function ForgotForm() {
   const [isLoading, setIsLoading] = useState(false);
@@ -33,10 +35,16 @@ export default function ForgotForm() {
   });
 
   const handleSubmit = async (values: TforgotPasswordSchema) => {
-    setIsLoading(true);
     try {
-      // TODO: Replace with real API call
-      console.log(values);
+      setIsLoading(true);
+      await authClient.forgetPassword({
+        email: values.email,
+        redirectTo: "/reset-password",
+      });
+      toast("A reset password link has been sent to your email.");
+    } catch (error) {
+      toast("An error occurred while sending the reset password link.");
+      console.error(error);
     } finally {
       setIsLoading(false);
     }

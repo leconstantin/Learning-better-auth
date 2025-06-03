@@ -1,8 +1,8 @@
 "use client";
 
+import { zodResolver } from "@hookform/resolvers/zod";
 import { useCallback, useState } from "react";
 import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -23,10 +23,13 @@ import {
 
 import { Info } from "lucide-react";
 
+import { authClient } from "@/lib/auth-client";
 import {
   resetPasswordSchema,
   TresetPasswordSchema,
 } from "@/lib/validation/passwordSchema";
+import { useRouter, useSearchParams } from "next/navigation";
+import { toast } from "sonner";
 import { Spinner } from "./spinner";
 
 export default function ResetPasswordForm() {
@@ -40,6 +43,10 @@ export default function ResetPasswordForm() {
       confirm_password: "",
     },
   });
+
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const token = searchParams.get("token");
 
   const calculatePasswordStrength = useCallback((password: string) => {
     let strength = 0;
@@ -61,10 +68,19 @@ export default function ResetPasswordForm() {
   };
 
   const handleSubmit = async (values: TresetPasswordSchema) => {
-    setIsLoading(true);
     try {
-      // TODO: Call API here
-      console.log(values);
+      setIsLoading(true);
+
+      await authClient.resetPassword({
+        newPassword: values.new_password,
+        token: token as string,
+      });
+      toast("Your password has been reset.");
+
+      router.push("/sign-in");
+    } catch (error) {
+      toast("An error occurred while resetting your password.");
+      console.error(error);
     } finally {
       setIsLoading(false);
     }
