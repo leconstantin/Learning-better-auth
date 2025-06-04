@@ -10,16 +10,7 @@ export const auth = betterAuth({
   database: prismaAdapter(prisma, {
     provider: "postgresql",
   }),
-  //  emailVerification: {
-  //       sendVerificationEmail: async ({ user, url, token }, request) => {
-  //           await resend.emails.send({
-  //                from: `${process.env.EMAIL_SENDER_NAME} <${process.env.EMAIL_SENDER_ADDRESS}>`,
-  //               to: user.email,
-  //               subject: 'Verify your email address',
-  //               text: `Click the link to verify your email: ${url}`
-  //           })
-  //       }
-  //   },
+
   emailVerification: {
     async sendVerificationEmail({ user, url }) {
       const res = await resend.emails.send({
@@ -33,10 +24,8 @@ export const auth = betterAuth({
   },
   emailAndPassword: {
     enabled: true,
-    // requireEmailVerification: true,
     sendResetPassword: async ({ user, url, token }, request) => {
       await resend.emails.send({
-        // from: `${process.env.EMAIL_SENDER_NAME} <${process.env.EMAIL_SENDER_ADDRESS}>`,
         from: "Acme <onboarding@resend.dev>",
         to: user.email,
         subject: "Reset your password",
@@ -49,6 +38,11 @@ export const auth = betterAuth({
     window: 60 * 1000, // 1 minute
     max: 10, // 10 requests per minute
   },
-
+  socialProviders: {
+    google: {
+      clientId: process.env.GOOGLE_CLIENT_ID as string,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET as string,
+    },
+  },
   plugins: [nextCookies()],
 });

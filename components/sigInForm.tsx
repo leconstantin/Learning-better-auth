@@ -22,6 +22,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { PasswordInput } from "./ui/password-input";
 import { Spinner } from "./spinner";
+import { authClient } from "@/lib/auth-client";
 
 export default function SignInForm() {
   const router = useRouter();
@@ -52,7 +53,12 @@ export default function SignInForm() {
       setIsLoading(false);
     }
   };
-
+  const handleLogInWithGoogle = async () => {
+    await authClient.signIn.social({
+      provider: "google",
+      callbackURL: "/dashboard",
+    });
+  };
   return (
     <section className="flex flex-col gap-8">
       <header className="flex flex-col gap-2">
@@ -133,6 +139,8 @@ export default function SignInForm() {
         variant="outline"
         className="w-full rounded-none"
         aria-label="Sign in with Google"
+        type="button"
+        onClick={handleLogInWithGoogle}
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"
